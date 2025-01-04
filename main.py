@@ -3,6 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Python 3.10 호환성 적용
+from __future__ import annotations
+
 # 제목 및 설명 추가
 st.title('Streamlit 데이터 분석 대시보드')
 st.write('업로드한 CSV 파일의 데이터를 탐색하고 시각화합니다.')
