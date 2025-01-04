@@ -46,21 +46,22 @@ data['인구밀도'] = data['인구수'] / data['면적']
 data['개발점수'] = (data['인구밀도'] / 50) + (data['학교수'] * 0.8)
 
 # 데이터 그룹화 (년도와 자치구 기준으로 합산)
-grouped_data = data.groupby(['년도', '자치구']).agg({'개발점수': 'sum', '학교수': 'sum'}).reset_index()
+grouped_data = data.groupby(['년도', '자치구']).agg({'개발점수': 'sum', '학교수': 'sum', '인구밀도': 'mean'}).reset_index()
 
 # 데이터 필터링
 filtered_data = grouped_data[(grouped_data['자치구'].isin(selected_districts)) & 
                               (grouped_data['년도'] >= selected_years[0]) & 
                               (grouped_data['년도'] <= selected_years[1])]
 
-# 시각화: 개발 점수와 학교 수
-st.write(f"### 선택한 자치구의 개발 점수 및 학교 수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
+# 시각화: 개발 점수, 학교 수, 인구 밀도
+st.write(f"### 선택한 자치구의 개발 점수, 학교 수 및 인구 밀도 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
 fig = go.Figure()
 
 for district in selected_districts:
     district_data = filtered_data[filtered_data['자치구'] == district]
     fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['개발점수'], mode='lines+markers', name=f'{district} 개발점수'))
     fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['학교수'], mode='lines+markers', name=f'{district} 학교수'))
+    fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['인구밀도'], mode='lines+markers', name=f'{district} 인구밀도'))
 
-fig.update_layout(title='개발 점수 및 학교 수 변화', xaxis_title='년도', yaxis_title='값', legend_title='항목')
+fig.update_layout(title='개발 점수, 학교 수 및 인구 밀도 변화', xaxis_title='년도', yaxis_title='값', legend_title='항목')
 st.plotly_chart(fig)
