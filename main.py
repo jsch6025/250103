@@ -25,21 +25,24 @@ st.write(data.head())
 
 # 사용자 입력: 자치구 선택
 districts = sorted(data['자치구'].unique())
-selected_district = st.selectbox('확인할 자치구를 선택하세요:', districts)
+selected_districts = st.multiselect('확인할 자치구를 선택하세요:', districts, default=[districts[0]])
 
 # 사용자 입력: 년도 선택
 years = sorted(data['년도'].unique())
 selected_years = st.slider('확인할 년도 범위를 선택하세요:', min_value=min(years), max_value=max(years), value=(min(years), max(years)))
 
 # 데이터 필터링
-filtered_data = data[(data['자치구'] == selected_district) & (data['년도'] >= selected_years[0]) & (data['년도'] <= selected_years[1])]
+filtered_data = data[(data['자치구'].isin(selected_districts)) & (data['년도'] >= selected_years[0]) & (data['년도'] <= selected_years[1])]
 
 # 시각화
-st.write(f"### {selected_district}의 인구수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
+st.write(f"### 선택한 자치구의 인구수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(filtered_data['년도'], filtered_data['인구수'], marker='o')
+for district in selected_districts:
+    district_data = filtered_data[filtered_data['자치구'] == district]
+    ax.plot(district_data['년도'], district_data['인구수'], marker='o', label=district)
 ax.set_xlabel('년도')
 ax.set_ylabel('인구수')
-ax.set_title(f'{selected_district}의 인구수 변화')
+ax.set_title('자치구별 인구수 변화')
+ax.legend()
 ax.grid(True)
 st.pyplot(fig)
