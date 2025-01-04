@@ -41,9 +41,21 @@ area_data = {
 }
 
 # 인구 밀도 및 개발 점수 계산
+# 면적 및 인구 밀도 계산
 data['면적'] = data['자치구'].map(area_data)
 data['인구밀도'] = data['인구수'] / data['면적']
-data['개발점수'] = (data['인구밀도'] / 50) + (data['학교수'] * 0.8)
+
+# 가중치 조정
+data['가중치'] = 1/50
+is_60s = data['나이대'] == '60대 이상'
+data.loc[is_60s, '가중치'] = 1/100
+
+# 20~40대 가중치 증가
+is_20s_40s = data['나이대'].isin(['20대', '30대', '40대'])
+data.loc[is_20s_40s, '가중치'] = 1/25
+
+# 개발 점수 계산
+data['개발점수'] = (data['인구밀도'] * data['가중치']) + (data['학교수'] * 0.8)
 
 # 데이터 그룹화 (년도와 자치구 기준으로 합산)
 grouped_data = data.groupby(['년도', '자치구']).agg({'개발점수': 'sum', '학교수': 'sum', '인구밀도': 'mean'}).reset_index()
@@ -53,15 +65,17 @@ filtered_data = grouped_data[(grouped_data['자치구'].isin(selected_districts)
                               (grouped_data['년도'] >= selected_years[0]) & 
                               (grouped_data['년도'] <= selected_years[1])]
 
-# 시각화: 개발 점수, 학교 수, 인구 밀도
-st.write(f"### 선택한 자치구의 개발 점수, 학교 수 및 인구 밀도 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
-fig = go.Figure()
+# 사용자 엔터 입력 대기
+if st.button('시각화 보기'):
+    # 시각화: 개발 점수, 학교 수, 인구 밀도
+    st.write(f"### 선택한 자치구의 개발 점수, 학교 수 및 인구 밀도 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
+    fig = go.Figure()
 
-for district in selected_districts:
-    district_data = filtered_data[filtered_data['자치구'] == district]
-    fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['개발점수'], mode='lines+markers', name=f'{district} 개발점수'))
-    fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['학교수'], mode='lines+markers', name=f'{district} 학교수'))
-    fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['인구밀도'], mode='lines+markers', name=f'{district} 인구밀도'))
+    for district in selected_districts:
+        district_data = filtered_data[filtered_data['자치구'] == district]
+        fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['개발점수'], mode='lines+markers', name=f'{district} 개발점수'))
+        fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['학교수'], mode='lines+markers', name=f'{district} 학교수'))
+        fig.add_trace(go.Scatter(x=district_data['년도'], y=district_data['인구밀도'], mode='lines+markers', name=f'{district} 인구밀도'))
 
-fig.update_layout(title='개발 점수, 학교 수 및 인구 밀도 변화', xaxis_title='년도', yaxis_title='값', legend_title='항목')
-st.plotly_chart(fig)
+    fig.update_layout(title='개발 점수, 학교 수 및 인구 밀도 변화', xaxis_title='년도', yaxis_title='값', legend_title='항목')
+    st.plotly_chart(fig)
