@@ -3,10 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import koreanize_matplotlib
-# 폰트 설정
-plt.rc('font', family='Malgun Gothic')  # 한글 폰트 설정
-plt.rc('axes', unicode_minus=False)  # 마이너스 기호 깨짐 방지
-
 # 제목 및 설명 추가
 st.title('서울 자치구별 인구수 변화')
 st.write('최근 30년간 서울시 자치구의 인구 변화를 시각화합니다.')
