@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from statsmodels.tsa.arima.model import ARIMA
 
 # 제목 및 설명 추가
-st.title('서울 자치구별 개발 정도 시각화')
+st.title('서울 자치구별 개발 정도 시각화 및 예측')
 st.write('서울시 자치구의 개발 정도를 다양한 지표로 수치화하고 시각화합니다.')
 
 # 데이터 불러오기
@@ -83,3 +84,18 @@ for district in selected_districts:
 
 fig.update_layout(title='선택 항목 변화', xaxis_title='년도', yaxis_title='값', legend_title='항목')
 st.plotly_chart(fig)
+
+# 향후 10년 예측 기능 추가
+st.write("### 향후 10년 예측")
+forecast_fig = go.Figure()
+for district in selected_districts:
+    for metric in options:
+        district_data = filtered_data[filtered_data['자치구'] == district]
+        model = ARIMA(district_data[metric], order=(1, 1, 1))
+        fit_model = model.fit()
+        forecast = fit_model.forecast(steps=10)
+        future_years = list(range(selected_years[1] + 1, selected_years[1] + 11))
+        forecast_fig.add_trace(go.Scatter(x=future_years, y=forecast, mode='lines+markers', name=f'{district} {metric} 예측'))
+
+forecast_fig.update_layout(title='향후 10년 예측', xaxis_title='년도', yaxis_title='값', legend_title='항목')
+st.plotly_chart(forecast_fig)
