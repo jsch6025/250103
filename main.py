@@ -34,6 +34,14 @@ selected_years = st.slider('확인할 년도 범위를 선택하세요:', min_va
 # 데이터 필터링
 filtered_data = data[(data['자치구'].isin(selected_districts)) & (data['년도'] >= selected_years[0]) & (data['년도'] <= selected_years[1])]
 
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+
+# 한글 폰트 설정
+plt.rc('font', family='Malgun Gothic')  # Windows의 경우
+plt.rc('axes', unicode_minus=False)     # 마이너스 기호 깨짐 방지
+
+
 # 시각화
 st.write(f"### 선택한 자치구의 인구수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
 fig, ax = plt.subplots(figsize=(10, 6))
