@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
 # 폰트 설정
-plt.rc('font', family='Consolas')  # Consolas 폰트 설정
+plt.rc('font', family='Malgun Gothic')  # 한글 폰트 설정
 plt.rc('axes', unicode_minus=False)  # 마이너스 기호 깨짐 방지
 
 # 제목 및 설명 추가
