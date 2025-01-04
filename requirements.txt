@@ -1,4 +1,4 @@
 streamlit
 matplotlib
 koreanize-matplotlib
-plotly
+plotly.express
