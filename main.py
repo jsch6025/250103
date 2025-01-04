@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from statsmodels.tsa.arima.model import ARIMA
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM
 
 # 제목 및 설명 추가
 st.title('서울 자치구별 개발 정도 시각화 및 예측')
@@ -85,17 +88,45 @@ for district in selected_districts:
 fig.update_layout(title='선택 항목 변화', xaxis_title='년도', yaxis_title='값', legend_title='항목')
 st.plotly_chart(fig)
 
-# 향후 10년 예측 기능 추가
-st.write("### 향후 10년 예측")
+# 딥러닝 기반 예측 모델 추가 (LSTM)
+st.write("### 향후 10년 예측 (딥러닝 기반)")
 forecast_fig = go.Figure()
+
 for district in selected_districts:
     for metric in options:
-        district_data = filtered_data[filtered_data['자치구'] == district]
-        model = ARIMA(district_data[metric], order=(1, 1, 1))
-        fit_model = model.fit()
-        forecast = fit_model.forecast(steps=10)
+        district_data = filtered_data[filtered_data['자치구'] == district][metric].values
+
+        # 데이터 전처리
+        data_scaled = (district_data - np.min(district_data)) / (np.max(district_data) - np.min(district_data))
+        X = []
+        y = []
+        for i in range(len(data_scaled) - 1):
+            X.append(data_scaled[i])
+            y.append(data_scaled[i + 1])
+        X = np.array(X).reshape(-1, 1, 1)
+        y = np.array(y)
+
+        # LSTM 모델 정의
+        model = Sequential()
+        model.add(LSTM(50, activation='relu', input_shape=(1, 1)))
+        model.add(Dense(1))
+        model.compile(optimizer='adam', loss='mse')
+
+        # 모델 학습
+        model.fit(X, y, epochs=50, batch_size=1, verbose=0)
+
+        # 예측
+        predictions = []
+        current_input = X[-1]
+        for _ in range(10):
+            pred = model.predict(current_input.reshape(1, 1, 1))
+            predictions.append(pred[0][0])
+            current_input = pred
+
+        # 스케일 복원
+        predictions = np.array(predictions) * (np.max(district_data) - np.min(district_data)) + np.min(district_data)
         future_years = list(range(selected_years[1] + 1, selected_years[1] + 11))
-        forecast_fig.add_trace(go.Scatter(x=future_years, y=forecast, mode='lines+markers', name=f'{district} {metric} 예측'))
+        forecast_fig.add_trace(go.Scatter(x=future_years, y=predictions, mode='lines+markers', name=f'{district} {metric} 예측'))
 
 forecast_fig.update_layout(title='향후 10년 예측', xaxis_title='년도', yaxis_title='값', legend_title='항목')
 st.plotly_chart(forecast_fig)
