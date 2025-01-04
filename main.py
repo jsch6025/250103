@@ -34,10 +34,13 @@ selected_years = st.slider('년도 범위 선택:', min_value=min(years), max_va
 # 개발 정도 점수 계산 (실제 데이터 활용)
 data['개발점수'] = (data['인구수'] / 1000) + data['학교수'] * 0.8
 
+# 데이터 그룹화 (년도와 자치구 기준으로 합산)
+grouped_data = data.groupby(['년도', '자치구']).agg({'개발점수': 'sum'}).reset_index()
+
 # 데이터 필터링
-filtered_data = data[(data['자치구'].isin(selected_districts)) & 
-                      (data['년도'] >= selected_years[0]) & 
-                      (data['년도'] <= selected_years[1])]
+filtered_data = grouped_data[(grouped_data['자치구'].isin(selected_districts)) & 
+                              (grouped_data['년도'] >= selected_years[0]) & 
+                              (grouped_data['년도'] <= selected_years[1])]
 
 # 시각화
 st.write(f"### 선택한 자치구의 개발 점수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
