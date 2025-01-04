@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import matplotlib.pyplot as plt
 
 # 제목 및 설명 추가
 st.title('서울 자치구별 인구수 변화 대시보드')
@@ -26,7 +26,12 @@ if uploaded_file is not None:
 
     # 시각화
     st.write(f"### {selected_district}의 인구수 변화")
-    fig = px.line(filtered_data, x='년도', y='인구수', markers=True, title=f'{selected_district}의 인구수 변화')
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(filtered_data['년도'], filtered_data['인구수'], marker='o')
+    ax.set_xlabel('년도')
+    ax.set_ylabel('인구수')
+    ax.set_title(f'{selected_district}의 인구수 변화')
+    ax.grid(True)
+    st.pyplot(fig)
 else:
     st.write("CSV 파일을 업로드하세요.")
