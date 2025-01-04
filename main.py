@@ -27,11 +27,15 @@ st.write(data.head())
 districts = sorted(data['자치구'].unique())
 selected_district = st.selectbox('확인할 자치구를 선택하세요:', districts)
 
+# 사용자 입력: 년도 선택
+years = sorted(data['년도'].unique())
+selected_years = st.slider('확인할 년도 범위를 선택하세요:', min_value=min(years), max_value=max(years), value=(min(years), max(years)))
+
 # 데이터 필터링
-filtered_data = data[data['자치구'] == selected_district]
+filtered_data = data[(data['자치구'] == selected_district) & (data['년도'] >= selected_years[0]) & (data['년도'] <= selected_years[1])]
 
 # 시각화
-st.write(f"### {selected_district}의 인구수 변화")
+st.write(f"### {selected_district}의 인구수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.plot(filtered_data['년도'], filtered_data['인구수'], marker='o')
 ax.set_xlabel('년도')
