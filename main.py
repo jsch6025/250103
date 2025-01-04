@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import koreanize_matplotlib
+import plotly.express as px
+
 # 제목 및 설명 추가
 st.title('서울 자치구별 인구수 변화')
 st.write('최근 30년간 서울시 자치구의 인구 변화를 시각화합니다.')
@@ -36,13 +36,5 @@ filtered_data = data[(data['자치구'].isin(selected_districts)) & (data['년�
 
 # 시각화
 st.write(f"### 선택한 자치구의 인구수 변화 ({selected_years[0]}년 ~ {selected_years[1]}년)")
-fig, ax = plt.subplots(figsize=(10, 6))
-for district in selected_districts:
-    district_data = filtered_data[filtered_data['자치구'] == district]
-    ax.plot(district_data['년도'], district_data['인구수'], marker='o', label=district)
-ax.set_xlabel('년도')
-ax.set_ylabel('인구수')
-ax.set_title('자치구별 인구수 변화')
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
+fig = px.line(filtered_data, x='년도', y='인구수', color='자치구', markers=True, title='자치구별 인구수 변화')
+st.plotly_chart(fig)
