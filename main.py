@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 import koreanize_matplotlib
 # 제목 및 설명 추가
 st.title('서울 자치구별 인구수 변화')
