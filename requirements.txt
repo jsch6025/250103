@@ -2,3 +2,4 @@ streamlit
 matplotlib
 koreanize-matplotlib
 plotly.express
+tensorflow
