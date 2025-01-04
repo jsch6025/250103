@@ -80,31 +80,30 @@ for district in selected_districts:
 fig.update_layout(title='개발 점수 변화', xaxis_title='년도', yaxis_title='개발점수', legend_title='자치구')
 st.plotly_chart(fig)
 
-# 딥러닝 기반 예측 모델 추가 (LSTM)
+# 딥러닝 기반 예측 모델 추가 (LSTM, 최적화 적용)
 st.write("### 향후 10년 개발 점수 예측 (딥러닝 기반)")
 forecast_fig = go.Figure()
+
+# LSTM 모델 초기화 및 재사용
+model = Sequential()
+model.add(LSTM(50, activation='relu', input_shape=(1, 1)))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mse')
 
 for district in selected_districts:
     district_data = filtered_data[filtered_data['자치구'] == district]['개발점수'].values
 
     # 데이터 전처리
     data_scaled = (district_data - np.min(district_data)) / (np.max(district_data) - np.min(district_data))
-    X = []
-    y = []
+    X, y = [], []
     for i in range(len(data_scaled) - 1):
         X.append(data_scaled[i])
         y.append(data_scaled[i + 1])
     X = np.array(X).reshape(-1, 1, 1)
     y = np.array(y)
 
-    # LSTM 모델 정의
-    model = Sequential()
-    model.add(LSTM(50, activation='relu', input_shape=(1, 1)))
-    model.add(Dense(1))
-    model.compile(optimizer='adam', loss='mse')
-
-    # 모델 학습
-    model.fit(X, y, epochs=50, batch_size=1, verbose=0)
+    # 모델 학습 최적화 (에포크와 배치 크기 조정)
+    model.fit(X, y, epochs=20, batch_size=4, verbose=0)
 
     # 예측
     predictions = []
